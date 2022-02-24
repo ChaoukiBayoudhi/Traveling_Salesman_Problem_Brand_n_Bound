@@ -67,11 +67,13 @@ public class TspBranchNBound {
             int[] column=getColumn(M,i);
             int m=min(column);
             for (int j = 0; j < nbCities; j++) {
-                if(M[i][j]!=Integer.MAX_VALUE)
-                    M[i][j]-=m;
+                if(M[j][i]!=Integer.MAX_VALUE)
+                    M[j][i]-=m;
             }
             reductionCost+=m;
         }
+        System.out.println("Reduction Columns Result :");
+        showGraph();
         return reductionCost;
     }
 
