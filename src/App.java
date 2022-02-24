@@ -10,7 +10,7 @@ class App {
         TspBranchNBound.generateGraph(n);
         TspBranchNBound.showGraph();
         //System.out.println(Arrays.toString(TspBranchNBound.getColumns(2)));
-        int reductionCost=TspBranchNBound.reduce();
+        int reductionCost=TspBranchNBound.reduce(TspBranchNBound.graph);
         System.out.println("Reduction Cost = "+reductionCost);
         System.out.println("initial reduced matrix :");
         TspBranchNBound.showGraph();
