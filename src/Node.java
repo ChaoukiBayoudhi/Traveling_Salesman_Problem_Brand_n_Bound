@@ -20,6 +20,7 @@ public class Node implements Comparable<Node> {
         if(o ==null)
             return 1;
         return this.cost-o.cost;
+
     }
 
 }
