@@ -13,7 +13,8 @@ public class Node implements Comparable<Node> {
     @EqualsAndHashCode.Include
     private int cost;
     private int[][] reducedMatrix;
-    private List<Integer> courantWay=new ArrayList<>();
+    private List<Integer> currentWay=new ArrayList<>();
+    private boolean readyNode =false;
 
     @Override
     public int compareTo(Node o) {
@@ -22,5 +23,4 @@ public class Node implements Comparable<Node> {
         return this.cost-o.cost;
 
     }
-
 }
