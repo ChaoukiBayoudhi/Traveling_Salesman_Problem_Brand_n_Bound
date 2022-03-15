@@ -1,18 +1,13 @@
-
-import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class TspBranchNBound {
     public static int[][] graph;
     public static int nbCities;
-    public static long cost=0L;
+    protected static long cost=0L;
     public static int startCity;
-    public static Queue<Node> leafQueue=new LinkedList<>();
     public static List<Integer> finalCycle;
-
-    //generate an oriented graph randomly
+    public static Queue<Node> leafQueue=new LinkedList<>();
+    //generates a graph matrix randomly
     public static void generateGraph(int N)
     {
         Random rd=new Random();
@@ -23,12 +18,13 @@ public class TspBranchNBound {
             for (int j = 0; j < nbCities; j++)
             {
                 if(i!=j)
-                    graph[i][j]=1+rd.nextInt(10);
+                    graph[i][j]=1+rd.nextInt(100);
                 //graph[j][i]=graph[i][j];
             }
         }
     }
-    public static void showGraph(int[][] graph) {
+    //prints the graph matrix
+    public static void showGraph() {
         for (int i = 0; i < nbCities; i++) {
 
             for (int j = 0; j < nbCities; j++) {
@@ -37,112 +33,149 @@ public class TspBranchNBound {
             System.out.println();
         }
     }
-    private static int min(int[] T)
+    //find the minimum of the given array
+    public static int min(int[] T)
     {
-        int min=T[0];
+        int min=Integer.MAX_VALUE;
         for (int x:T) {
             if(x<min)
                 min=x;
         }
+        if(min==Integer.MAX_VALUE)
+            min=0;
         return min;
     }
-    private static int[] getColumn(int[][] M, int columnIndex) {
-        return IntStream.range(0,M.length)
-                .map(x->M[x][columnIndex]).toArray();
-    }
-    //or more simply
-
-//    public static int[] getColumn(int[][] M, int columnIndex) {
-//        int[] column = new int[M.length];
-//        for (int i = 0; i < M.length; i++) {
-//            column[i]=M[i][columnIndex];
-//        }
-//        return column;
+    //    public static int[] getColumn(int columnIndex) {
+//        return IntStream.range(0,graph.length)
+//                .map(x->graph[x][columnIndex]).toArray();
 //    }
+    //returns the column of given index from the matrix M
+    public static int[] getColumn(int[][] M, int columnIndex) {
+        int[] column = new int[M.length];
+        for (int i = 0; i < M.length; i++) {
+            column[i]=M[i][columnIndex];
+        }
+        return column;
+    }
+    //loop matrix rows and the columns and substract the min from each case.
+    //returns the reduction's cost
     public static int reduce(int[][] M)
     {
         int reductionCost=0;
         for (int[] row: M) {
             int m=min(row);
-            if(m!=Integer.MAX_VALUE) {
-                reduceArray(row, m);
-                reductionCost += m;
-            }
+            reduceArray(row,m);
+            reductionCost+=m;
         }
-//        System.out.println("Reduction Rows Result :");
-//        showGraph();
+
         for (int i = 0; i <nbCities ; i++) {
             int[] column=getColumn(M,i);
             int m=min(column);
-            if(m!=Integer.MAX_VALUE) {
-                for (int j = 0; j < nbCities; j++) {
-                    if (M[j][i] != Integer.MAX_VALUE)
-                        M[j][i] -= m;
-                }
-                reductionCost += m;
+            for (int j = 0; j < nbCities; j++) {
+                if(M[j][i]!=Integer.MAX_VALUE)
+                    M[j][i]-=m;
             }
+            reductionCost+=m;
         }
-//        System.out.println("Reduction Columns Result :");
-//        showGraph();
+
         return reductionCost;
     }
-
+    //reduces one row or one column
     private static void reduceArray(int[] T,int min) {
         for (int i = 0; i < T.length; i++) {
             if(T[i]!=Integer.MAX_VALUE)
                 T[i]-=min;
         }
     }
+    //returns the node with the minimal cost
     public static Node getMinLeaf(Queue<Node> leafQueue)
     {
-        Iterator<Node> it = leafQueue.iterator();
-        System.out.println("size = "+leafQueue.size());
-        Node min=it.next();
-
+        Iterator<Node> it=leafQueue.iterator();
+        Node minNode = it.next();
         while(it.hasNext())
         {
-            Node n=it.next();//        System.out.println("identique(n,parent)"+(n.getReducedMatrix()==parent.getReducedMatrix()));
-
-            if(n.compareTo(min)<0)
-                min=n;
+            Node n=it.next();
+            if(n.compareTo(minNode)<0)
+                minNode =n;
         }
-        return min;
+        return minNode;
     }
-    //loop the reduce Matrix and uses the courantWay of the given Node to find its children.
-    public static List<Node> getPossibleChildrenNodes(Node n)
-    {
-        List<Node> lstChildren=new ArrayList<>();
-        for (int i = 0; i <nbCities ; i++) {
-            if(!n.getCurrentWay().contains(i+1))//&& n.getReducedMatrix()[n.getCityNumber()-1][i-1]!=Integer.MAX_VALUE)
+    //returns possible next nodes for the node n.
+    public static List<Node> getPossibleChildrenNodes(Node n){
+        List<Node> lstChilderen=new ArrayList<>();
+        for (int i = 1; i <=nbCities ; i++) {//loop cities numbers
+            if(!n.getCurrentWay().contains(i))  //if the cities is not aleady visited
             {
                 Node node=new Node();
-                node.setCityNumber(i+1);
-                List<Integer> nodeWay=new ArrayList<>(n.getCurrentWay());
-                nodeWay.add(i+1);
-                node.setCurrentWay(nodeWay);
-                lstChildren.add(node);
+                node.setCityNumber(i);
+                List<Integer> ncurrentWay=n.getCurrentWay();
+                //node.setCurrentWay(new ArrayList<>(n.getCurrentWay()));
+                //node.getCurrentWay().add(i);
+                //or
+                List<Integer> nodeCurrentWay=new ArrayList<>(n.getCurrentWay());
+                nodeCurrentWay.add(i);
+                node.setCurrentWay(nodeCurrentWay);
+                node.setReducedMatrix(copyGraph(n.getReducedMatrix()));
+                lstChilderen.add(node);
             }
         }
-        return lstChildren;
+        return lstChilderen;
     }
-    public static void setNodeCost(@NotNull Node n, @NotNull Node parent)
-    {
+    public static void setNodeCost(Node n, Node parent){
         //pretreatment
-        n.setReducedMatrix(parent.getReducedMatrix().clone());
-        int[][] nReducedMatrix=n.getReducedMatrix();
-        for (int j = 0; j <nbCities ; j++) {
-            nReducedMatrix[parent.getCityNumber()-1][j]=Integer.MAX_VALUE;
-            nReducedMatrix[j][n.getCityNumber()-1]=Integer.MAX_VALUE;
+        int[][] M=n.getReducedMatrix();
+        for (int i = 0; i < nbCities; i++) {
+            M[parent.getCityNumber()-1][i]=Integer.MAX_VALUE;
+            M[i][n.getCityNumber()-1]=Integer.MAX_VALUE;
         }
-        nReducedMatrix[n.getCityNumber()-1][startCity-1]=Integer.MAX_VALUE;
+        M[n.getCityNumber()-1][startCity-1]=Integer.MAX_VALUE;
 
-        //reduce the node n matrix and set the cost of n
-        int x=reduce(nReducedMatrix);
-       n.setCost(x+parent.getCost()+graph[parent.getCityNumber()-1][n.getCityNumber()-1]);
+        int reductionCost=reduce(M);
+        n.setCost(reductionCost+ parent.getCost()+graph[parent.getCityNumber()-1][n.getCityNumber()-1]);
     }
-    public static void resolveTSP(int start)
-    {
+    public static void resolveTSP(int start){
+        startCity=start;
+        //create the first node associated to the start city
+        Node currentNode =new Node();
+        currentNode.setCityNumber(startCity);
+        currentNode.getCurrentWay().add(startCity);
+        int reductionCost=reduce(graph);
+        System.out.println("Reduced Graph : ");
+        showGraph();;
+        currentNode.setCost(reductionCost);
+        int[][] graphCopy=copyGraph(graph);
+        currentNode.setReducedMatrix(graphCopy);
+        currentNode.setReadyNode(true);
+        System.out.println("first reduction cost = "+reductionCost);
+        leafQueue.offer(currentNode);//add the start node to the leaf's queue
+        while(!leafQueue.isEmpty()&&currentNode.getCurrentWay().size()<nbCities)
+        {
+            List<Node> lstChilderen= getPossibleChildrenNodes(currentNode);
+            if(!lstChilderen.isEmpty()) {
+                for(Node x:lstChilderen)
+                {
+                    if(!x.isReadyNode()) {
+                        setNodeCost(x, currentNode);
+                        x.setReadyNode(true);
+                    }
+                }
+
+                leafQueue.remove(currentNode);
+                leafQueue.addAll(lstChilderen);//add all children as leaf to the queue
+                currentNode=getMinLeaf(leafQueue);
+            }
+            cost=currentNode.getCost();
+            finalCycle=new ArrayList<>(currentNode.getCurrentWay());
+            finalCycle.add(startCity);
+        }
 
     }
 
+    private static int[][] copyGraph(int[][] M) {
+        int[][] copy = new int[M.length][M.length];
+        for (int i=0; i<M.length; i++)
+            for (int j = 0; j < nbCities; j++)
+                copy[i][j] = M[i][j];
+        return copy;
+    }
 }

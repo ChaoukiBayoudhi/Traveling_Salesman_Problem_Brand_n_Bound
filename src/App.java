@@ -8,7 +8,7 @@ class App {
         System.out.println("Number of cities ? ");
         int n=sc.nextInt();
         TspBranchNBound.generateGraph(n);
-        TspBranchNBound.showGraph(TspBranchNBound.graph);
+        TspBranchNBound.showGraph();
 //        //System.out.println(Arrays.toString(TspBranchNBound.getColumns(2)));
 //        int reductionCost=TspBranchNBound.reduce(TspBranchNBound.graph);
 //        System.out.println("Reduction Cost = "+reductionCost);
@@ -18,7 +18,6 @@ class App {
         int start=sc.nextInt();
         TspBranchNBound.resolveTSP(start);
         System.out.println(TspBranchNBound.finalCycle);
-        System.out.println("Cost = "+ TspBranchNBound.cost);
-
+        System.out.println("Final Cost = "+ TspBranchNBound.cost);
     }
 }

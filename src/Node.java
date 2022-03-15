@@ -14,7 +14,7 @@ public class Node implements Comparable<Node> {
     private int cost;
     private int[][] reducedMatrix;
     private List<Integer> currentWay=new ArrayList<>();
-    private boolean readyNode =false;
+    private boolean isReadyNode =false;
 
     @Override
     public int compareTo(Node o) {
