@@ -15,10 +15,11 @@ public class TspBranchNBound {
         graph=new int[N][N];
         for (int i = 0; i < nbCities; i++) {
             graph[i][i]=Integer.MAX_VALUE;
-            for (int j = 0; j < nbCities; j++)
+            for (int j = 0; j < i; j++)
             {
-                if(i!=j)
+
                     graph[i][j]=1+rd.nextInt(100);
+                    graph[j][i]=graph[i][j];
                 //graph[j][i]=graph[i][j];
             }
         }
@@ -133,7 +134,7 @@ public class TspBranchNBound {
         int reductionCost=reduce(M);
         n.setCost(reductionCost+ parent.getCost()+graph[parent.getCityNumber()-1][n.getCityNumber()-1]);
     }
-    public static void resolveTSP(int start){
+    public static void solveTSP(int start){
         startCity=start;
         //create the first node associated to the start city
         Node currentNode =new Node();

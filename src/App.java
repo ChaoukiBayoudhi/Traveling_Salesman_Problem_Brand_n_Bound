@@ -16,7 +16,7 @@ class App {
 //        TspBranchNBound.showGraph();
         System.out.println("Start City ? ");
         int start=sc.nextInt();
-        TspBranchNBound.resolveTSP(start);
+        TspBranchNBound.solveTSP(start);
         System.out.println(TspBranchNBound.finalCycle);
         System.out.println("Final Cost = "+ TspBranchNBound.cost);
     }
